@@ -62,11 +62,16 @@ def name_count(count=0):
 
 def norm_filetype(syntax):
   """Normalize filetype"""
+  if syntax.startswith('wrap'):
+    try:
+      return 'wrap', int(syntax[4:])
+    except:
+      return 'wrap', None
   try:
     lexer = pygments.lexers.get_lexer_by_name(syntax)
-    return lexer.name.lower()
+    return lexer.name.lower(), None
   except:
-    return 'text'
+    return None, None
 
 
 def render(code, formatter, syntax):

@@ -16,6 +16,7 @@ import bson
 import time
 import datetime
 from hashlib import md5
+from textwrap import fill
 
 import model
 import config
@@ -57,14 +58,18 @@ class Index:
         syntax = web.ctx.query[1:].lower()
       if not syntax:
         raise util.response(codes['text'])
-      # NOTE: syntax may fall back to text
-      syntax = util.norm_filetype(syntax)
+      # NOTE: syntax may fall back to default syntax
+      syntax, syntax_para = util.norm_filetype(syntax)
+      if syntax == None:
+        syntax = config.DEFAULT_SYNTAX
+      if syntax == 'wrap' and syntax_para == None:
+        syntax_para = config.DEFAULT_WIDTH
 
       is_t = util.is_termua(web.ctx.env['HTTP_USER_AGENT'])
       s = lambda s: 't_'+s if is_t else s
 
       # If there is rendered code in database already, just return it
-      if syntax != 'text':
+      if syntax != 'text' and syntax != 'wrap':
         code = codes.get(s(syntax), None)
       else:
         # Fallback text
@@ -72,6 +77,9 @@ class Index:
       if code is not None:
         if is_t or syntax == 'text':
           raise util.response(code)
+        elif syntax == 'wrap':
+          raise util.response('\n'.join(\
+                  map(lambda x: fill(x, syntax_para), code.split('\n'))))
         else:
           return render.code(code)
       # Otherwise we should render text first

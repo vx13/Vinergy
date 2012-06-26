@@ -23,3 +23,10 @@ DBURL = {'host': 'localhost',
 
 ### Url length
 PAD = 3
+
+### Default syntax to fallback
+DEFAULT_SYNTAX = 'wrap'
+
+## Default wrap width
+DEFAULT_WIDTH = 80
+

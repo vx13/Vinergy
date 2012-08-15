@@ -48,6 +48,8 @@ class Index:
         got = got.rsplit('/', 1)[0]
       else:
         syntax = None
+      if got.startswith('paste'):
+          return render.paste(config.URL);
       doc = model.get_code_by_name(got)
       # "got" nothing
       if not doc:
@@ -100,6 +102,10 @@ class Index:
     '''Insert new code'''
     try:
       code = web.input().vimcn
+      try:
+        lang = web.input().lang
+      except AttributeError:
+        lang = ''
       # Content must be longer than "print 'Hello, world!'"
       # or smaller than 64 KiB
       if (len(code) < 21) or (len(code)/1024 > 64): raise ValueError
@@ -113,7 +119,7 @@ class Index:
         epoch = time.mktime(datetime.datetime.utctimetuple(datetime.\
                                                            datetime.utcnow()))
         model.insert_code(oid, name, code, count, epoch)
-      raise util.response(' ' + config.URL + '/' + name + '\n')
+      raise util.response(' ' + config.URL + '/' + name + '/' + lang + '\n')
     except AttributeError:
       status = '400 Bad Request'
       raise util.response('Oops. Please Check your command.\n', status)
